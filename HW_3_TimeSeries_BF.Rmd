@@ -1,0 +1,73 @@
+---
+title: "HW2_BF_TimeSeriesForecasting"
+author: "Anjali Dembla"
+date: "2022-09-24"
+output: html_document
+
+
+---
+
+## Forecast Model Accuracy
+* Mean Absolute Error  $MAE = \frac{\sum_{t=1}^{n}|e_t|}{n}$
+* Mean Squared Error $MSE = \frac{\sum_{t=1}^{n}e_t^2}{n}$
+* Root Mean Squared Error $\sqrt{MSE}$
+* Mean Absolute Percent Error $MAPE = \frac{\sum_{t=1}^{n}\frac{|e_t|}{Y_{t}}*100}{n}$
+* Mean Percent Error $MPE = \frac{\sum_{t=1}^{n}\frac{e_t}{Y_{t}}*100}{n}$
+
+```{r}
+library(fpp)
+library(fpp2)
+data()
+#Loading the electricity monthly total net generation for US data set
+data <- usmelec
+print(data)
+print(head(data))
+
+#Plotting to see how data values looks
+autoplot(data) + ggtitle("Electricity Monthly Total Net Generation") + ylab("Values for net generation")
+
+#Trying to investigate the patterns through auto correlation function
+acf(data)
+#Data has seasonal pattern as well
+#Data has a strong trend. Removing the trend to investigate further
+D <- diff(data)
+plot(D)
+#Over time the net electricity generation has increased
+#Holt winters model
+tmp <- HoltWinters(data)
+attributes(tmp)
+plot(tmp)
+#Forecasted values above follow the trends by actual values
+tmp_f <- forecast(tmp)
+attributes(tmp_f)
+plot(tmp_f)
+plot(tmp_f$residuals)
+#Checking whether the residuals have any pattern
+hist(tmp_f$residuals)
+#The histogram above has normalized pattern
+Acf(tmp_f$residuals)
+#No pattern observed in residuals
+
+#Accuracy for the model
+accuracy(tmp_f)
+
+data2 <- window(data,start=1973,end=c(2011,4))
+datafit1 <- meanf(data2,h=10)
+datafit2 <- rwf(data2,h=10)
+datafit3 <- snaive(data2,h=10)
+autoplot(window(data, start=1973)) +
+  autolayer(datafit1, series="Mean", PI=FALSE) +
+  autolayer(datafit2, series="Naïve", PI=FALSE) +
+  autolayer(datafit3, series="Seasonal naïve", PI=FALSE) +
+  xlab("Year") + ylab("Electricity net generation") +
+  ggtitle("Forecasts for tottal net generation of electricity") +
+  guides(colour=guide_legend(title="Forecast"))
+#Checking the accuracy measures on the test data created
+data3 <- window(data, start=2012)
+accuracy(datafit1, data3)
+accuracy(datafit2, data3)
+accuracy(datafit3, data3)
+
+
+#Seasonal naive would be the best fit with least errors in the measures.Among the measures the mean absolute squared error is the least. 
+```
