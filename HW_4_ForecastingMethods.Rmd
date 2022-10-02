@@ -1,0 +1,75 @@
+---
+title: "HW_4_ForecastingMethods"
+author: "Anjali Dembla"
+date: "2022-09-30"
+output: html_document
+---
+
+```{r}
+library(fpp)
+library(fpp2)
+library(TTR)
+
+#Loading the electricity monthly total net generation for US data set
+data <- usmelec
+print(data)
+print(head(data))
+
+attributes(data)
+#Plotting to see how data values looks
+autoplot(data) + ggtitle("Electricity Monthly Total Net Generation") + ylab("Values for net generation")
+Acf(data)
+
+#take Mean of all available history
+
+mean_forecast <- meanf(data,5)
+plot(mean_forecast)
+
+# Naive
+naive_forecast <- naive(data,5)
+plot(naive_forecast)
+
+# Random Walk
+rwf_forecast <- rwf(data,5)
+rwf_forecast <- rwf(data,5, drift=TRUE)
+# Seasonal Naive
+snaive_forecast <- snaive(data,5)
+
+# Moving Averages
+
+MA5_forecast <- ma(data,order=5)
+MA9_forecast <- ma(data,order=9)
+
+# plot all in a single chart
+plot(mean_forecast)
+lines(naive_forecast$mean,col="red")
+lines(rwf_forecast$mean,col="green")
+lines(snaive_forecast$mean,col="black")
+lines(MA5_forecast,col="Pink")
+lines(MA9_forecast,col="Blue")
+# what other attributes are there?
+attributes(naive_forecast)
+
+# Decomposition
+ets_forecast <- ets(data)
+plot(ets_forecast)
+attributes(ets_forecast)
+ets_forecast$mse
+
+# HoltWinters
+HW_forecast <- HoltWinters(data)
+plot(HW_forecast)
+SSE_Simple <- HoltWinters(data,beta=FALSE,gamma=FALSE)
+attributes(SSE_Simple)
+plot(SSE_Simple)
+SSE_Simple$SSE
+head(SSE_Simple$fitted)
+
+#Forecast
+forecast_ets_1 <- forecast.ets(ets_forecast, h=5)
+plot(forecast_ets_1)
+forecast_ets_2 <- forecast(ets_forecast, h=5)
+plot(forecast_ets_2)
+
+```
+
