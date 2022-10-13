@@ -1,0 +1,47 @@
+---
+title: "HW5_Decompositon"
+author: "Anjali Dembla"
+date: "2022-10-13"
+output: html_document
+---
+
+```{r}
+#Loading the required libraries
+library(fpp)
+library(fpp2)
+library(TTR)
+
+#Loading the electricity monthly total net generation for US data set
+data <- usmelec
+print(data)
+print(head(data))
+
+attributes(data)
+
+head(data)
+plot(data)
+stl_decomp <- stl(data,s.window ="periodic")
+plot(stl_decomp)
+attributes(stl_decomp)
+
+# Lets print out a seasonal adjustment
+seasadj(stl_decomp)
+# Plot a line on the graph
+plot(data)
+lines(seasadj(stl_decomp), col="Red")
+# Default period forecast
+f_stl <- forecast(stl_decomp)
+# you can pass the # of period
+f_stl <- forecast(stl_decomp,h=15)
+f_stl
+plot(f_stl)
+# There is more than one way to do things
+decomp_elec <- decompose(data)
+
+# Each one shows different attributes 
+attributes(decomp_elec)
+seasadj(decomp_elec)
+
+
+```
+
