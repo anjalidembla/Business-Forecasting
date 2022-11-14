@@ -1,0 +1,52 @@
+---
+title: "ARIMA_HW6"
+author: "Anjali Dembla"
+date: "2022-11-12"
+output: html_document
+---
+
+```{r}
+#Loading the required libraries
+library(fpp)
+library(fpp2)
+library(TTR)
+library(urca)
+
+#Loading the electricity monthly total net generation for US data set
+data <- usmelec
+print(data)
+print(head(data))
+
+attributes(data)
+
+head(data)
+plot(data)
+
+#Test to check whether differencing required
+data %>% ur.kpss() %>% summary()
+#test statistic is much bigger so null hypothesis rejected i.e series not stationary and require differencing
+ndiffs(data)
+nsdiffs(data)
+tsdisplay(data)
+diff1 <- diff(data, differences=1)
+plot(diff1)
+tsdisplay(diff1)
+diff1 %>% ur.kpss() %>% summary()
+
+auto_fit <- auto.arima(data, trace=TRUE, stepwise = FALSE)
+auto_fit
+attributes(auto_fit)
+plot(forecast(auto_fit,h=5,level=c(99.5)))
+#Residual Analysis
+Acf(auto_fit$residuals)
+Box.test(residuals(auto_fit), lag=20, type="Ljung")
+
+plot.ts(residuals(auto_fit))
+hist(auto_fit$residuals)#normal
+tsdiag(auto_fit)
+
+
+
+
+
+```
